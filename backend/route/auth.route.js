@@ -2,6 +2,8 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import User from "../model/user.model.js";
+import Session from "../model/session.model.js";
+import authMiddleware from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
@@ -55,18 +57,50 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    const session = await Session.create({
+      userId: user._id,
+    });
+
+    await session.save();
+
     const token = jwt.sign(
       { userId: user._id, email: email },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    res.cookie(token);
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 3600000,
+    });
 
     res.status(200).json({ message: "Login successfull" });
   } catch (error) {
     console.log("Login Error: ", error.message);
     res.status(500).json({ message: "Somethin went wrong" });
+  }
+});
+
+router.post("/logout", authMiddleware, async (req, res) => {
+  try {
+    const user = req.user;
+
+    const session = await Session.findOneAndUpdate(
+      { userId: user.userId },
+      {
+        loggedOutAt: Date.now(),
+      }
+    );
+
+    res.clearCookie();
+
+    res
+      .status(200)
+      .json({ message: "Logout successfull", userSession: session });
+  } catch (error) {
+    console.log("Error in Logout ", error.message);
+    res.status(500).json({ message: "Something went wrong!" });
   }
 });
 

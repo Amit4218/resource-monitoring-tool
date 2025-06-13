@@ -1,4 +1,3 @@
-import { application } from "express";
 import mongoose from "mongoose";
 
 const applicationSchema = mongoose.Schema(
@@ -33,6 +32,6 @@ const applicationSchema = mongoose.Schema(
   { timestamps: true }
 );
 
-const Application = mongoose.model("token", applicationSchema);
+const Application = mongoose.model("application", applicationSchema);
 
 export default Application;
