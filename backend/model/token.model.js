@@ -1,12 +1,13 @@
+import { application } from "express";
 import mongoose from "mongoose";
 
-const tokenSchema = mongoose.Schema(
+const applicationSchema = mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
     },
-    appName: {
+    applicationName: {
       type: String,
       required: true,
     },
@@ -32,6 +33,6 @@ const tokenSchema = mongoose.Schema(
   { timestamps: true }
 );
 
-const Token = mongoose.model("token", tokenSchema);
+const Application = mongoose.model("token", applicationSchema);
 
-export default Token;
+export default Application;
