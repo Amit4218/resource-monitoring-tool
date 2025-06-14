@@ -73,9 +73,18 @@ router.post("/login", async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 3600000,
+      path: "/",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     });
 
-    res.status(200).json({ message: "Login successfull" });
+    res.status(200).json({
+      message: "Login successfull",
+      userInfo: {
+        id: user._id,
+        email: user.email,
+        profilePic: user.profilePic,
+      },
+    });
   } catch (error) {
     console.log("Login Error: ", error.message);
     res.status(500).json({ message: "Somethin went wrong" });
@@ -93,7 +102,7 @@ router.post("/logout", authMiddleware, async (req, res) => {
       }
     );
 
-    res.clearCookie();
+    res.clearCookie("token");
 
     res
       .status(200)
